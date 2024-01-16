@@ -1,18 +1,19 @@
-FROM php:7.1.17-apache
-LABEL maintainer="Jaivic"
+# Use an official PHP runtime as a parent image
+FROM php:7.4-apache
 
-RUN a2enmod rewrite
+# Set the working directory in the container
+WORKDIR /var/www/html
 
-RUN apt-get update && apt-get install -y \
-        zlib1g-dev \
-        libicu-dev \
-        libxml2-dev \
-        libpq-dev\
-	
-        && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-        && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip intl xmlrpc soap opcache \
-        && docker-php-ext-configure pdo_mysql --with-pdo-mysql=mysqlnd \
-        && apt-get install vim -y
+# Copy your PHP application code into the container
+COPY . .
 
-COPY  . /var/www/html/
-WORKDIR /var/www/html/
+# Install PHP extensions and other dependencies
+RUN apt-get update && \
+    apt-get install -y libpng-dev && \
+    docker-php-ext-install pdo pdo_mysql gd
+
+# Expose the port Apache listens on
+EXPOSE 80
+
+# Start Apache when the container runs
+CMD ["apache2-foreground"]
